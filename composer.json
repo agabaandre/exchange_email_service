@@ -8,6 +8,8 @@
         "graph",
         "oauth",
         "laravel",
+        "laravel11",
+        "laravel12",
         "exchange",
         "office365"
     ],

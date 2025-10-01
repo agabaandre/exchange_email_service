@@ -71,6 +71,21 @@ DB_PASSWORD=your_password
 
 #### Register Service Provider
 
+**For Laravel 11+ (including Laravel 12):**
+
+Add to `bootstrap/providers.php`:
+
+```php
+<?php
+
+return [
+    // ... other providers
+    AgabaandreOffice365\ExchangeEmailService\ExchangeEmailServiceProvider::class,
+];
+```
+
+**For Laravel 10 and earlier:**
+
 Add to `config/app.php`:
 
 ```php
@@ -437,6 +452,8 @@ EXCHANGE_DEBUG=true
 
 - PHP 7.4+
 - Laravel 6.0+ (optional)
+  - **Laravel 11+**: Service providers go in `bootstrap/providers.php`
+  - **Laravel 10 and earlier**: Service providers go in `config/app.php`
 - Microsoft 365/Azure AD account
 - Valid OAuth app registration
 
