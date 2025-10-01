@@ -242,23 +242,38 @@ $emailService->sendEmail(
 - `standalone_usage.php` - Complete standalone example
 - `example_usage.php` - Comprehensive examples
 
-### Laravel Integration (Optional)
-
-#### Method 1: Standalone in Laravel (Recommended)
-
-Use the package directly in Laravel without the service provider or publishing:
+### Laravel Integration
 
 **Quick Setup:**
-1. Install the package: `composer require agabaandre-office365/exchange-email-service`
+1. Install: `composer require agabaandre-office365/exchange-email-service`
 2. Add configuration to `config/services.php` (see below)
 3. Add environment variables to `.env` (see below)
-4. Use directly in your code (no service provider needed!)
+4. Use directly in your code - no service provider needed!
 
 **Configuration:**
 
+Add to your `config/services.php`:
+```php
+'exchange' => [
+    'tenant_id' => env('EXCHANGE_TENANT_ID'),
+    'client_id' => env('EXCHANGE_CLIENT_ID'),
+    'client_secret' => env('EXCHANGE_CLIENT_SECRET'),
+    'redirect_uri' => env('EXCHANGE_REDIRECT_URI'),
+],
+```
+
+Add to your `.env`:
+```env
+EXCHANGE_TENANT_ID=your_tenant_id
+EXCHANGE_CLIENT_ID=your_client_id
+EXCHANGE_CLIENT_SECRET=your_client_secret
+EXCHANGE_REDIRECT_URI=http://your-domain.com/oauth/callback
+```
+
+**Usage in Controllers:**
 ```php
 <?php
-// In your Laravel controller, job, or anywhere
+// In your Laravel controller
 
 use AgabaandreOffice365\ExchangeEmailService\ExchangeEmailService;
 
@@ -266,7 +281,6 @@ class EmailController extends Controller
 {
     public function sendEmail()
     {
-        // Create email service instance
         $emailService = new ExchangeEmailService([
             'tenant_id' => config('services.exchange.tenant_id'),
             'client_id' => config('services.exchange.client_id'),
@@ -276,7 +290,6 @@ class EmailController extends Controller
             'from_name' => config('mail.from.name')
         ]);
 
-        // Send email
         $emailService->sendEmail(
             'user@example.com',
             'Welcome!',
@@ -287,25 +300,7 @@ class EmailController extends Controller
 }
 ```
 
-**Add to your `config/services.php`:**
-```php
-'exchange' => [
-    'tenant_id' => env('EXCHANGE_TENANT_ID'),
-    'client_id' => env('EXCHANGE_CLIENT_ID'),
-    'client_secret' => env('EXCHANGE_CLIENT_SECRET'),
-    'redirect_uri' => env('EXCHANGE_REDIRECT_URI'),
-],
-```
-
-**Add to your `.env`:**
-```env
-EXCHANGE_TENANT_ID=your_tenant_id
-EXCHANGE_CLIENT_ID=your_client_id
-EXCHANGE_CLIENT_SECRET=your_client_secret
-EXCHANGE_REDIRECT_URI=http://your-domain.com/oauth/callback
-```
-
-**Using in Laravel Jobs:**
+**Usage in Laravel Jobs:**
 ```php
 <?php
 // app/Jobs/SendWelcomeEmailJob.php
@@ -335,7 +330,7 @@ class SendWelcomeEmailJob implements ShouldQueue
 }
 ```
 
-**Using in Laravel Commands:**
+**Usage in Laravel Commands:**
 ```php
 <?php
 // app/Console/Commands/SendTestEmailCommand.php
@@ -363,18 +358,27 @@ class SendTestEmailCommand extends Command
 }
 ```
 
+**Optional: Publish Configuration and Migrations**
+```bash
+# Publish configuration and migration files (optional)
+php artisan vendor:publish --all
+```
+
 **See `laravel_standalone_example.php` for complete examples!**
-
-#### Method 2: Using Service Provider (Optional)
-
-If you want to use the service provider:
 
 ### Basic Email Sending
 
 ```php
 use AgabaandreOffice365\ExchangeEmailService\ExchangeEmailService;
 
-$emailService = new ExchangeEmailService();
+$emailService = new ExchangeEmailService([
+    'tenant_id' => 'your-tenant-id',
+    'client_id' => 'your-client-id',
+    'client_secret' => 'your-client-secret',
+    'redirect_uri' => 'http://your-domain.com/oauth/callback',
+    'from_email' => 'noreply@yourcompany.com',
+    'from_name' => 'Your Company'
+]);
 
 // Send simple email
 $emailService->sendEmail(
@@ -385,28 +389,17 @@ $emailService->sendEmail(
 );
 ```
 
-### Laravel Integration
-
-```php
-// In your controller
-use AgabaandreOffice365\ExchangeEmailService\ExchangeEmailService;
-
-public function sendWelcomeEmail(Request $request)
-{
-    $emailService = app(ExchangeEmailService::class);
-    
-    $emailService->sendEmail(
-        $request->email,
-        'Welcome to Our Service!',
-        '<h1>Thank you for joining us!</h1>'
-    );
-}
-```
-
 ### Using Templates
 
 ```php
-$emailService = new ExchangeEmailService();
+$emailService = new ExchangeEmailService([
+    'tenant_id' => 'your-tenant-id',
+    'client_id' => 'your-client-id',
+    'client_secret' => 'your-client-secret',
+    'redirect_uri' => 'http://your-domain.com/oauth/callback',
+    'from_email' => 'noreply@yourcompany.com',
+    'from_name' => 'Your Company'
+]);
 
 // Send welcome email with template
 $emailService->sendTemplateEmail(
@@ -423,6 +416,15 @@ $emailService->sendTemplateEmail(
 ### Bulk Email Sending
 
 ```php
+$emailService = new ExchangeEmailService([
+    'tenant_id' => 'your-tenant-id',
+    'client_id' => 'your-client-id',
+    'client_secret' => 'your-client-secret',
+    'redirect_uri' => 'http://your-domain.com/oauth/callback',
+    'from_email' => 'noreply@yourcompany.com',
+    'from_name' => 'Your Company'
+]);
+
 $recipients = [
     'user1@example.com',
     'user2@example.com',
@@ -439,6 +441,15 @@ $emailService->sendBulkEmail(
 ### Email with CC and BCC
 
 ```php
+$emailService = new ExchangeEmailService([
+    'tenant_id' => 'your-tenant-id',
+    'client_id' => 'your-client-id',
+    'client_secret' => 'your-client-secret',
+    'redirect_uri' => 'http://your-domain.com/oauth/callback',
+    'from_email' => 'noreply@yourcompany.com',
+    'from_name' => 'Your Company'
+]);
+
 $emailService->sendEmail(
     'user@example.com',
     'Important Update',
@@ -454,6 +465,15 @@ $emailService->sendEmail(
 ### Email with Attachments
 
 ```php
+$emailService = new ExchangeEmailService([
+    'tenant_id' => 'your-tenant-id',
+    'client_id' => 'your-client-id',
+    'client_secret' => 'your-client-secret',
+    'redirect_uri' => 'http://your-domain.com/oauth/callback',
+    'from_email' => 'noreply@yourcompany.com',
+    'from_name' => 'Your Company'
+]);
+
 $attachments = [
     [
         'name' => 'document.pdf',
@@ -477,25 +497,19 @@ $emailService->sendEmail(
 
 ## 🧪 Testing
 
-### Run Tests
-
-```bash
-# Install dependencies
-composer install
-
-# Run tests
-composer test
-
-# Run tests with coverage
-composer test-coverage
-```
-
 ### Test Email Service
 
 ```php
 use AgabaandreOffice365\ExchangeEmailService\ExchangeEmailService;
 
-$emailService = new ExchangeEmailService();
+$emailService = new ExchangeEmailService([
+    'tenant_id' => 'your-tenant-id',
+    'client_id' => 'your-client-id',
+    'client_secret' => 'your-client-secret',
+    'redirect_uri' => 'http://your-domain.com/oauth/callback',
+    'from_email' => 'noreply@yourcompany.com',
+    'from_name' => 'Your Company'
+]);
 
 // Test connection
 $result = $emailService->testConnection();
@@ -509,26 +523,20 @@ if ($result['status'] === 'ready') {
 $emailService->sendTestEmail('test@example.com');
 ```
 
-### Laravel Testing
-
-```php
-// In your test
-use AgabaandreOffice365\ExchangeEmailService\ExchangeEmailService;
-
-public function test_email_sending()
-{
-    $emailService = app(ExchangeEmailService::class);
-    
-    $result = $emailService->sendTestEmail('test@example.com');
-    $this->assertTrue($result);
-}
-```
-
 ## 📧 Built-in Templates
 
 ### Welcome Template
 
 ```php
+$emailService = new ExchangeEmailService([
+    'tenant_id' => 'your-tenant-id',
+    'client_id' => 'your-client-id',
+    'client_secret' => 'your-client-secret',
+    'redirect_uri' => 'http://your-domain.com/oauth/callback',
+    'from_email' => 'noreply@yourcompany.com',
+    'from_name' => 'Your Company'
+]);
+
 $emailService->sendTemplateEmail(
     'user@example.com',
     'Welcome!',
@@ -543,6 +551,15 @@ $emailService->sendTemplateEmail(
 ### Notification Template
 
 ```php
+$emailService = new ExchangeEmailService([
+    'tenant_id' => 'your-tenant-id',
+    'client_id' => 'your-client-id',
+    'client_secret' => 'your-client-secret',
+    'redirect_uri' => 'http://your-domain.com/oauth/callback',
+    'from_email' => 'noreply@yourcompany.com',
+    'from_name' => 'Your Company'
+]);
+
 $emailService->sendTemplateEmail(
     'user@example.com',
     'Important Notification',
@@ -560,6 +577,15 @@ $emailService->sendTemplateEmail(
 ### Confirmation Template
 
 ```php
+$emailService = new ExchangeEmailService([
+    'tenant_id' => 'your-tenant-id',
+    'client_id' => 'your-client-id',
+    'client_secret' => 'your-client-secret',
+    'redirect_uri' => 'http://your-domain.com/oauth/callback',
+    'from_email' => 'noreply@yourcompany.com',
+    'from_name' => 'Your Company'
+]);
+
 $emailService->sendTemplateEmail(
     'user@example.com',
     'Action Confirmed',
@@ -576,63 +602,6 @@ $emailService->sendTemplateEmail(
 );
 ```
 
-## 🔄 Laravel Integration
-
-### Service Container
-
-The service is automatically registered in Laravel's service container:
-
-```php
-// In your controller
-public function sendEmail(Request $request)
-{
-    $emailService = app(ExchangeEmailService::class);
-    
-    $emailService->sendEmail(
-        $request->email,
-        'Welcome!',
-        '<h1>Thank you for registering!</h1>'
-    );
-}
-```
-
-### Queue Integration
-
-```php
-// In your job
-use AgabaandreOffice365\ExchangeEmailService\ExchangeEmailService;
-
-class SendWelcomeEmail implements ShouldQueue
-{
-    public function handle()
-    {
-        $emailService = new ExchangeEmailService();
-        $emailService->sendTemplateEmail(
-            $this->email,
-            'Welcome!',
-            'welcome',
-            ['name' => $this->name, 'app_name' => 'My App']
-        );
-    }
-}
-```
-
-### Artisan Commands
-
-```php
-// Create custom command
-php artisan make:command TestEmailService
-
-// In the command
-use AgabaandreOffice365\ExchangeEmailService\ExchangeEmailService;
-
-public function handle()
-{
-    $emailService = new ExchangeEmailService();
-    $emailService->sendTestEmail('admin@example.com');
-    $this->info('Test email sent!');
-}
-```
 
 ## 🛠️ Troubleshooting
 
@@ -652,10 +621,9 @@ public function handle()
    - Check Azure app registration settings
 
 4. **"No publishable resources for tag []"**
-   - Make sure the service provider is registered in `bootstrap/providers.php` (Laravel 11+) or `config/app.php` (Laravel 10-)
-   - Clear Laravel caches: `php artisan config:clear && php artisan cache:clear`
-   - Try publishing with the full provider class name
-   - Restart your web server/queue workers
+   - This is normal - the package works without publishing
+   - Use `php artisan vendor:publish --all` if you want to publish config/migrations
+   - Or just use the package directly without publishing
 
 ### Debug Mode
 
@@ -668,11 +636,9 @@ EXCHANGE_DEBUG=true
 ## 📋 Requirements
 
 - PHP 7.4+
-- Laravel 6.0+ (optional)
-  - **Laravel 11+**: Service providers go in `bootstrap/providers.php`
-  - **Laravel 10 and earlier**: Service providers go in `config/app.php`
 - Microsoft 365/Azure AD account
 - Valid OAuth app registration
+- Laravel 6.0+ (optional - works with any PHP framework)
 
 ## 🎯 Production Checklist
 
@@ -680,8 +646,7 @@ EXCHANGE_DEBUG=true
 - [ ] Environment variables configured
 - [ ] OAuth setup completed (one-time)
 - [ ] Test email sent successfully
-- [ ] Database migrations run
-- [ ] Queue jobs configured (if using queues)
+- [ ] Database migrations run (if using database)
 - [ ] Error handling implemented
 - [ ] Logging configured
 
