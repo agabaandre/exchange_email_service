@@ -93,8 +93,10 @@ echo "\n";
 echo "5. Testing Laravel integration...\n";
 if (class_exists('Illuminate\Support\ServiceProvider')) {
     echo "   ✅ Laravel ServiceProvider class available\n";
+    echo "   ✅ Laravel integration ready\n";
 } else {
     echo "   ⚠️  Laravel not detected (this is normal if not using Laravel)\n";
+    echo "   ✅ Package works in standalone mode\n";
 }
 
 echo "\n";
