@@ -244,7 +244,130 @@ $emailService->sendEmail(
 
 ### Laravel Integration (Optional)
 
-If you're using Laravel, you can optionally use the service provider:
+#### Method 1: Standalone in Laravel (Recommended)
+
+Use the package directly in Laravel without the service provider or publishing:
+
+**Quick Setup:**
+1. Install the package: `composer require agabaandre-office365/exchange-email-service`
+2. Add configuration to `config/services.php` (see below)
+3. Add environment variables to `.env` (see below)
+4. Use directly in your code (no service provider needed!)
+
+**Configuration:**
+
+```php
+<?php
+// In your Laravel controller, job, or anywhere
+
+use AgabaandreOffice365\ExchangeEmailService\ExchangeEmailService;
+
+class EmailController extends Controller
+{
+    public function sendEmail()
+    {
+        // Create email service instance
+        $emailService = new ExchangeEmailService([
+            'tenant_id' => config('services.exchange.tenant_id'),
+            'client_id' => config('services.exchange.client_id'),
+            'client_secret' => config('services.exchange.client_secret'),
+            'redirect_uri' => config('services.exchange.redirect_uri'),
+            'from_email' => config('mail.from.address'),
+            'from_name' => config('mail.from.name')
+        ]);
+
+        // Send email
+        $emailService->sendEmail(
+            'user@example.com',
+            'Welcome!',
+            '<h1>Thank you for joining us!</h1>',
+            true
+        );
+    }
+}
+```
+
+**Add to your `config/services.php`:**
+```php
+'exchange' => [
+    'tenant_id' => env('EXCHANGE_TENANT_ID'),
+    'client_id' => env('EXCHANGE_CLIENT_ID'),
+    'client_secret' => env('EXCHANGE_CLIENT_SECRET'),
+    'redirect_uri' => env('EXCHANGE_REDIRECT_URI'),
+],
+```
+
+**Add to your `.env`:**
+```env
+EXCHANGE_TENANT_ID=your_tenant_id
+EXCHANGE_CLIENT_ID=your_client_id
+EXCHANGE_CLIENT_SECRET=your_client_secret
+EXCHANGE_REDIRECT_URI=http://your-domain.com/oauth/callback
+```
+
+**Using in Laravel Jobs:**
+```php
+<?php
+// app/Jobs/SendWelcomeEmailJob.php
+
+use AgabaandreOffice365\ExchangeEmailService\ExchangeEmailService;
+
+class SendWelcomeEmailJob implements ShouldQueue
+{
+    public function handle()
+    {
+        $emailService = new ExchangeEmailService([
+            'tenant_id' => config('services.exchange.tenant_id'),
+            'client_id' => config('services.exchange.client_id'),
+            'client_secret' => config('services.exchange.client_secret'),
+            'redirect_uri' => config('services.exchange.redirect_uri'),
+            'from_email' => config('mail.from.address'),
+            'from_name' => config('mail.from.name')
+        ]);
+        
+        $emailService->sendTemplateEmail(
+            $this->email,
+            'Welcome!',
+            'welcome',
+            ['name' => $this->name, 'app_name' => config('app.name')]
+        );
+    }
+}
+```
+
+**Using in Laravel Commands:**
+```php
+<?php
+// app/Console/Commands/SendTestEmailCommand.php
+
+use AgabaandreOffice365\ExchangeEmailService\ExchangeEmailService;
+
+class SendTestEmailCommand extends Command
+{
+    protected $signature = 'email:test {email}';
+    
+    public function handle()
+    {
+        $emailService = new ExchangeEmailService([
+            'tenant_id' => config('services.exchange.tenant_id'),
+            'client_id' => config('services.exchange.client_id'),
+            'client_secret' => config('services.exchange.client_secret'),
+            'redirect_uri' => config('services.exchange.redirect_uri'),
+            'from_email' => config('mail.from.address'),
+            'from_name' => config('mail.from.name')
+        ]);
+        
+        $result = $emailService->sendTestEmail($this->argument('email'));
+        $this->info($result ? 'Email sent!' : 'Failed to send email.');
+    }
+}
+```
+
+**See `laravel_standalone_example.php` for complete examples!**
+
+#### Method 2: Using Service Provider (Optional)
+
+If you want to use the service provider:
 
 ### Basic Email Sending
 
