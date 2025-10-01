@@ -8,7 +8,7 @@
 
 require_once 'vendor/autoload.php';
 
-use SendMail\ExchangeEmailService\ExchangeEmailService;
+use AgabaandreOffice365\ExchangeEmailService\ExchangeEmailService;
 
 // Example 1: Basic Configuration
 echo "<h2>Example 1: Basic Email Sending</h2>";
@@ -143,7 +143,7 @@ echo "<h2>Example 6: Laravel Integration</h2>";
 echo "<h3>In your Laravel Controller:</h3>";
 echo "<pre>";
 echo htmlspecialchars('
-use SendMail\ExchangeEmailService\ExchangeEmailService;
+use AgabaandreOffice365\ExchangeEmailService\ExchangeEmailService;
 
 class EmailController extends Controller
 {
@@ -170,7 +170,7 @@ echo "</pre>";
 echo "<h3>In your Laravel Job:</h3>";
 echo "<pre>";
 echo htmlspecialchars('
-use SendMail\ExchangeEmailService\ExchangeEmailService;
+use AgabaandreOffice365\ExchangeEmailService\ExchangeEmailService;
 
 class SendNewsletterJob implements ShouldQueue
 {

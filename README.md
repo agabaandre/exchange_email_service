@@ -41,6 +41,37 @@ composer install
 2. Copy to your project directory
 3. Run `composer install`
 
+## 🚀 Quick Start (Standalone Usage)
+
+**No Laravel required!** This package works in any PHP application:
+
+```php
+<?php
+require_once 'vendor/autoload.php';
+
+use AgabaandreOffice365\ExchangeEmailService\ExchangeEmailService;
+
+// Create email service
+$emailService = new ExchangeEmailService([
+    'tenant_id' => 'your-tenant-id',
+    'client_id' => 'your-client-id',
+    'client_secret' => 'your-client-secret',
+    'redirect_uri' => 'http://your-domain.com/oauth/callback',
+    'from_email' => 'noreply@yourcompany.com',
+    'from_name' => 'Your Company'
+]);
+
+// Send email
+$emailService->sendEmail(
+    'recipient@example.com',
+    'Hello World!',
+    '<h1>This is a test email</h1>',
+    true // is HTML
+);
+```
+
+**See `simple_example.php` for more examples!**
+
 ## 🔧 Configuration
 
 ### 1. Environment Variables
@@ -169,6 +200,51 @@ Route::get('/oauth/callback', function () {
 ```
 
 ## 📧 Usage
+
+### Standalone Usage (No Laravel)
+
+The package works perfectly without Laravel in any PHP application:
+
+```php
+<?php
+require_once 'vendor/autoload.php';
+
+use AgabaandreOffice365\ExchangeEmailService\ExchangeEmailService;
+
+// Method 1: Direct configuration
+$emailService = new ExchangeEmailService([
+    'tenant_id' => 'your-tenant-id',
+    'client_id' => 'your-client-id',
+    'client_secret' => 'your-client-secret',
+    'redirect_uri' => 'http://your-domain.com/oauth/callback',
+    'from_email' => 'noreply@yourcompany.com',
+    'from_name' => 'Your Company'
+]);
+
+// Method 2: Environment variables (recommended)
+$emailService = new ExchangeEmailService(); // Reads from .env file
+
+// Method 3: Configuration file
+$config = include 'config_standalone.php';
+$emailService = new ExchangeEmailService($config);
+
+// Send email
+$emailService->sendEmail(
+    'recipient@example.com',
+    'Subject',
+    '<h1>Hello World!</h1>',
+    true // is HTML
+);
+```
+
+**Examples:**
+- `simple_example.php` - Basic usage examples
+- `standalone_usage.php` - Complete standalone example
+- `example_usage.php` - Comprehensive examples
+
+### Laravel Integration (Optional)
+
+If you're using Laravel, you can optionally use the service provider:
 
 ### Basic Email Sending
 
