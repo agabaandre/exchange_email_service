@@ -94,6 +94,14 @@ echo "5. Testing Laravel integration...\n";
 if (class_exists('Illuminate\Support\ServiceProvider')) {
     echo "   ✅ Laravel ServiceProvider class available\n";
     echo "   ✅ Laravel integration ready\n";
+    
+    // Test if we can instantiate the service provider
+    try {
+        $provider = new \AgabaandreOffice365\ExchangeEmailService\ExchangeEmailServiceProvider();
+        echo "   ✅ ServiceProvider can be instantiated\n";
+    } catch (Exception $e) {
+        echo "   ⚠️  ServiceProvider instantiation failed: " . $e->getMessage() . "\n";
+    }
 } else {
     echo "   ⚠️  Laravel not detected (this is normal if not using Laravel)\n";
     echo "   ✅ Package works in standalone mode\n";

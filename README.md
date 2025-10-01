@@ -97,6 +97,8 @@ Add to `config/app.php`:
 
 #### Publish Configuration
 
+**Important**: Make sure the service provider is registered first (see step above).
+
 ```bash
 # Publish all resources
 php artisan vendor:publish --provider="AgabaandreOffice365\ExchangeEmailService\ExchangeEmailServiceProvider"
@@ -104,6 +106,11 @@ php artisan vendor:publish --provider="AgabaandreOffice365\ExchangeEmailService\
 # Or publish specific resources
 php artisan vendor:publish --tag=exchange-email-config
 php artisan vendor:publish --tag=exchange-email-migrations
+
+# If you get "No publishable resources" error, try:
+php artisan config:clear
+php artisan cache:clear
+php artisan vendor:publish --provider="AgabaandreOffice365\ExchangeEmailService\ExchangeEmailServiceProvider"
 ```
 
 #### Run Migrations
@@ -444,6 +451,12 @@ public function handle()
    - Check recipient email address
    - Verify OAuth permissions are granted
    - Check Azure app registration settings
+
+4. **"No publishable resources for tag []"**
+   - Make sure the service provider is registered in `bootstrap/providers.php` (Laravel 11+) or `config/app.php` (Laravel 10-)
+   - Clear Laravel caches: `php artisan config:clear && php artisan cache:clear`
+   - Try publishing with the full provider class name
+   - Restart your web server/queue workers
 
 ### Debug Mode
 
