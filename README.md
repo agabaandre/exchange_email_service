@@ -98,7 +98,12 @@ Add to `config/app.php`:
 #### Publish Configuration
 
 ```bash
+# Publish all resources
 php artisan vendor:publish --provider="AgabaandreOffice365\ExchangeEmailService\ExchangeEmailServiceProvider"
+
+# Or publish specific resources
+php artisan vendor:publish --tag=exchange-email-config
+php artisan vendor:publish --tag=exchange-email-migrations
 ```
 
 #### Run Migrations

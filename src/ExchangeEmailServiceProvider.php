@@ -36,12 +36,12 @@ if (class_exists('Illuminate\Support\ServiceProvider')) {
             // Publish configuration file
             $this->publishes([
                 __DIR__ . '/../config/exchange-email.php' => config_path('exchange-email.php'),
-            ], 'config');
+            ], 'exchange-email-config');
 
             // Publish migrations
             $this->publishes([
                 __DIR__ . '/../database/migrations/' => database_path('migrations'),
-            ], 'migrations');
+            ], 'exchange-email-migrations');
 
             // Load configuration
             $this->mergeConfigFrom(
