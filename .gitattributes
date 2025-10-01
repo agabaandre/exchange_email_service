@@ -1,0 +1,26 @@
+# Ensure these files are always treated as text
+*.php text
+*.md text
+*.json text
+*.xml text
+*.yml text
+*.yaml text
+
+# Ensure these files are always treated as binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.pdf binary
+
+# Export ignore files
+/.gitattributes export-ignore
+/.gitignore export-ignore
+/.github/ export-ignore
+/tests/ export-ignore
+/phpunit.xml export-ignore
+/.phpunit.result.cache export-ignore
+/coverage/ export-ignore
+/vendor/ export-ignore
+composer.lock export-ignore

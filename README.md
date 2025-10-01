@@ -27,6 +27,14 @@
 composer require sendmail/exchange-email-service
 ```
 
+### Development Installation
+
+```bash
+git clone https://github.com/sendmail/exchange-email-service.git
+cd exchange-email-service
+composer install
+```
+
 ### Manual Installation
 
 1. Download the package
@@ -242,6 +250,19 @@ $emailService->sendEmail(
 ```
 
 ## 🧪 Testing
+
+### Run Tests
+
+```bash
+# Install dependencies
+composer install
+
+# Run tests
+composer test
+
+# Run tests with coverage
+composer test-coverage
+```
 
 ### Test Email Service
 
