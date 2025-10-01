@@ -9,7 +9,7 @@
 
 require_once 'vendor/autoload.php';
 
-use SendMail\ExchangeEmailService\ExchangeEmailService;
+use AgabaandreOffice365\ExchangeEmailService\ExchangeEmailService;
 
 echo "🧪 Testing SendMail ExchangeEmailService Installation\n";
 echo "================================================\n\n";
@@ -17,9 +17,9 @@ echo "================================================\n\n";
 // Test 1: Check if classes exist
 echo "1. Checking if classes exist...\n";
 $classes = [
-    'SendMail\ExchangeEmailService\ExchangeEmailService',
-    'SendMail\ExchangeEmailService\ExchangeOAuth',
-    'SendMail\ExchangeEmailService\ExchangeEmailServiceProvider'
+    'AgabaandreOffice365\ExchangeEmailService\ExchangeEmailService',
+    'AgabaandreOffice365\ExchangeEmailService\ExchangeOAuth',
+    'AgabaandreOffice365\ExchangeEmailService\ExchangeEmailServiceProvider'
 ];
 
 foreach ($classes as $class) {

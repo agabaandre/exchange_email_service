@@ -1,10 +1,10 @@
 <?php
 
-namespace SendMail\ExchangeEmailService\Tests;
+namespace AgabaandreOffice365\ExchangeEmailService\Tests;
 
 use PHPUnit\Framework\TestCase;
-use SendMail\ExchangeEmailService\ExchangeEmailService;
-use SendMail\ExchangeEmailService\ExchangeOAuth;
+use AgabaandreOffice365\ExchangeEmailService\ExchangeEmailService;
+use AgabaandreOffice365\ExchangeEmailService\ExchangeOAuth;
 
 class ExchangeEmailServiceTest extends TestCase
 {
@@ -45,7 +45,7 @@ class ExchangeEmailServiceTest extends TestCase
 
     public function testServiceProviderClassExists()
     {
-        $this->assertTrue(class_exists('SendMail\ExchangeEmailService\ExchangeEmailServiceProvider'));
+        $this->assertTrue(class_exists('AgabaandreOffice365\ExchangeEmailService\ExchangeEmailServiceProvider'));
     }
 
     public function testConfigurationHandling()

@@ -1,5 +1,5 @@
 {
-    "name": "sendmail/exchange-email-service",
+    "name": "agabaandre-office365/exchange-email-service",
     "description": "General-purpose email service using Microsoft Graph API with OAuth 2.0 authentication",
     "type": "library",
     "keywords": [
@@ -14,8 +14,8 @@
     "license": "MIT",
     "authors": [
         {
-            "name": "SendMail ExchangeEmailService",
-            "email": "support@sendmail.com"
+            "name": "Andre Agaba",
+            "email": "agabaandre@gmail.com"
         }
     ],
     "require": {
@@ -29,21 +29,21 @@
     },
     "autoload": {
         "psr-4": {
-            "SendMail\\ExchangeEmailService\\": "src/"
+            "AgabaandreOffice365\\ExchangeEmailService\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "SendMail\\ExchangeEmailService\\Tests\\": "tests/"
+            "AgabaandreOffice365\\ExchangeEmailService\\Tests\\": "tests/"
         }
     },
     "extra": {
         "laravel": {
             "providers": [
-                "SendMail\\ExchangeEmailService\\ExchangeEmailServiceProvider"
+                "AgabaandreOffice365\\ExchangeEmailService\\ExchangeEmailServiceProvider"
             ],
             "aliases": {
-                "ExchangeEmail": "SendMail\\ExchangeEmailService\\ExchangeEmailService"
+                "ExchangeEmail": "AgabaandreOffice365\\ExchangeEmailService\\ExchangeEmailService"
             }
         }
     },

@@ -1,6 +1,6 @@
 <?php
 
-namespace SendMail\ExchangeEmailService;
+namespace AgabaandreOffice365\ExchangeEmailService;
 
 // Check if Laravel is available
 if (class_exists('Illuminate\Support\ServiceProvider')) {

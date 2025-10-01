@@ -1,10 +1,10 @@
-# SendMail ExchangeEmailService
+# AgabaandreOffice365 ExchangeEmailService
 
 **General-purpose email service using Microsoft Graph API with OAuth 2.0 authentication**
 
-[![Latest Version](https://img.shields.io/packagist/v/sendmail/exchange-email-service.svg)](https://packagist.org/packages/sendmail/exchange-email-service)
-[![License](https://img.shields.io/packagist/l/sendmail/exchange-email-service.svg)](https://packagist.org/packages/sendmail/exchange-email-service)
-[![PHP Version](https://img.shields.io/packagist/php-v/sendmail/exchange-email-service.svg)](https://packagist.org/packages/sendmail/exchange-email-service)
+[![Latest Version](https://img.shields.io/packagist/v/agabaandre-office365/exchange-email-service.svg)](https://packagist.org/packages/agabaandre-office365/exchange-email-service)
+[![License](https://img.shields.io/packagist/l/agabaandre-office365/exchange-email-service.svg)](https://packagist.org/packages/agabaandre-office365/exchange-email-service)
+[![PHP Version](https://img.shields.io/packagist/php-v/agabaandre-office365/exchange-email-service.svg)](https://packagist.org/packages/agabaandre-office365/exchange-email-service)
 
 ## 🚀 Features
 
@@ -24,13 +24,13 @@
 ### Via Composer
 
 ```bash
-composer require sendmail/exchange-email-service
+composer require agabaandre-office365/exchange-email-service
 ```
 
 ### Development Installation
 
 ```bash
-git clone https://github.com/sendmail/exchange-email-service.git
+git clone https://github.com/agabaandre/exchange_email_service.git
 cd exchange-email-service
 composer install
 ```
@@ -76,14 +76,14 @@ Add to `config/app.php`:
 ```php
 'providers' => [
     // ... other providers
-    SendMail\ExchangeEmailService\ExchangeEmailServiceProvider::class,
+    AgabaandreOffice365\ExchangeEmailService\ExchangeEmailServiceProvider::class,
 ],
 ```
 
 #### Publish Configuration
 
 ```bash
-php artisan vendor:publish --provider="SendMail\ExchangeEmailService\ExchangeEmailServiceProvider"
+php artisan vendor:publish --provider="AgabaandreOffice365\ExchangeEmailService\ExchangeEmailServiceProvider"
 ```
 
 #### Run Migrations
@@ -146,7 +146,7 @@ Route::get('/oauth/callback', function () {
 ### Basic Email Sending
 
 ```php
-use SendMail\ExchangeEmailService\ExchangeEmailService;
+use AgabaandreOffice365\ExchangeEmailService\ExchangeEmailService;
 
 $emailService = new ExchangeEmailService();
 
@@ -163,7 +163,7 @@ $emailService->sendEmail(
 
 ```php
 // In your controller
-use SendMail\ExchangeEmailService\ExchangeEmailService;
+use AgabaandreOffice365\ExchangeEmailService\ExchangeEmailService;
 
 public function sendWelcomeEmail(Request $request)
 {
@@ -267,7 +267,7 @@ composer test-coverage
 ### Test Email Service
 
 ```php
-use SendMail\ExchangeEmailService\ExchangeEmailService;
+use AgabaandreOffice365\ExchangeEmailService\ExchangeEmailService;
 
 $emailService = new ExchangeEmailService();
 
@@ -287,7 +287,7 @@ $emailService->sendTestEmail('test@example.com');
 
 ```php
 // In your test
-use SendMail\ExchangeEmailService\ExchangeEmailService;
+use AgabaandreOffice365\ExchangeEmailService\ExchangeEmailService;
 
 public function test_email_sending()
 {
@@ -374,7 +374,7 @@ public function sendEmail(Request $request)
 
 ```php
 // In your job
-use SendMail\ExchangeEmailService\ExchangeEmailService;
+use AgabaandreOffice365\ExchangeEmailService\ExchangeEmailService;
 
 class SendWelcomeEmail implements ShouldQueue
 {
@@ -398,7 +398,7 @@ class SendWelcomeEmail implements ShouldQueue
 php artisan make:command TestEmailService
 
 // In the command
-use SendMail\ExchangeEmailService\ExchangeEmailService;
+use AgabaandreOffice365\ExchangeEmailService\ExchangeEmailService;
 
 public function handle()
 {

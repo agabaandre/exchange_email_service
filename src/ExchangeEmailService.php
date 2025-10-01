@@ -1,6 +1,6 @@
 <?php
 
-namespace SendMail\ExchangeEmailService;
+namespace AgabaandreOffice365\ExchangeEmailService;
 
 /**
  * Exchange Email Service
