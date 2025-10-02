@@ -5,12 +5,11 @@
  * Test the general-purpose email service package
  */
 
-require_once 'src/ExchangeEmailService.php';
-require_once 'src/ExchangeOAuth.php';
+require_once 'vendor/autoload.php';
 
-use SendMail\ExchangeEmailService\ExchangeEmailService;
+use AgabaandreOffice365\ExchangeEmailService\ExchangeEmailService;
 
-echo "<h2>🧪 SendMail ExchangeEmailService - Package Test</h2>";
+echo "<h2>🧪 Exchange Email Service - Package Test</h2>";
 
 try {
     // Initialize the email service
@@ -67,7 +66,7 @@ try {
         
         echo "<div style='background: #d1ecf1; color: #0c5460; padding: 15px; border-radius: 5px; margin: 10px 0;'>";
         echo "<h4>🎉 Package Features Working!</h4>";
-        echo "<p>Your SendMail ExchangeEmailService package is ready with:</p>";
+        echo "<p>Your Exchange Email Service package is ready with:</p>";
         echo "<ul>";
         echo "<li>✅ <strong>Microsoft Graph API</strong> - Most reliable method</li>";
         echo "<li>✅ <strong>OAuth 2.0 Security</strong> - No password storage</li>";
@@ -83,7 +82,7 @@ try {
         
         echo "<div style='background: #fff3cd; color: #856404; padding: 15px; border-radius: 5px; margin: 10px 0;'>";
         echo "<h4>📦 Package Ready for Distribution</h4>";
-        echo "<p>Your SendMail ExchangeEmailService package includes:</p>";
+        echo "<p>Your Exchange Email Service package includes:</p>";
         echo "<ul>";
         echo "<li><strong>ExchangeEmailService.php</strong> - Main email service class</li>";
         echo "<li><strong>ExchangeOAuth.php</strong> - OAuth 2.0 handler</li>";

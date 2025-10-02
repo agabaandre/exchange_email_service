@@ -5,56 +5,78 @@ namespace AgabaandreOffice365\ExchangeEmailService;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Config;
 
+/**
+ * Exchange Email Service Provider for Laravel
+ * 
+ * @author Andre Agaba
+ * @version 1.0.0
+ */
 class ExchangeEmailServiceProvider extends ServiceProvider
 {
     /**
-     * Register services.
+     * Register services
      */
     public function register()
     {
-        $this->app->singleton(ExchangeEmailService::class, function ($app) {
-            $config = [
-                'tenant_id' => Config::get('exchange_email.tenant_id'),
-                'client_id' => Config::get('exchange_email.client_id'),
-                'client_secret' => Config::get('exchange_email.client_secret'),
-                'redirect_uri' => Config::get('exchange_email.redirect_uri'),
-                'scope' => Config::get('exchange_email.scope'),
-                'from_email' => Config::get('exchange_email.from_email'),
-                'from_name' => Config::get('exchange_email.from_name'),
-            ];
-
+        $this->app->singleton('exchange-email', function ($app) {
+            $config = $this->getConfig();
             return new ExchangeEmailService($config);
         });
 
-        $this->app->alias(ExchangeEmailService::class, 'exchange-email');
+        $this->app->alias('exchange-email', ExchangeEmailService::class);
     }
 
     /**
-     * Bootstrap services.
+     * Bootstrap services
      */
     public function boot()
     {
-        // Load configuration
-        $this->mergeConfigFrom(
-            __DIR__ . '/../config/exchange-email.php', 'exchange_email'
-        );
-
         // Publish configuration file
-        $this->publishes([
-            __DIR__ . '/../config/exchange-email.php' => config_path('exchange-email.php'),
-        ], 'exchange-email-config');
+        if ($this->app->runningInConsole()) {
+            $this->publishes([
+                __DIR__ . '/../config/exchange-email.php' => config_path('exchange-email.php'),
+            ], 'config');
+        }
 
-        // Publish migrations
-        $this->publishes([
-            __DIR__ . '/../database/migrations/' => database_path('migrations'),
-        ], 'exchange-email-migrations');
+        // Merge configuration
+        $this->mergeConfigFrom(
+            __DIR__ . '/../config/exchange-email.php',
+            'exchange-email'
+        );
     }
 
     /**
-     * Get the services provided by the provider.
+     * Get configuration
+     */
+    protected function getConfig()
+    {
+        $config = [];
+        
+        // Try to get from Laravel config
+        if (function_exists('config')) {
+            $config = config('exchange-email', []);
+        }
+        
+        // Fallback to environment variables
+        $envConfig = [
+            'tenant_id' => env('EXCHANGE_TENANT_ID', ''),
+            'client_id' => env('EXCHANGE_CLIENT_ID', ''),
+            'client_secret' => env('EXCHANGE_CLIENT_SECRET', ''),
+            'redirect_uri' => env('EXCHANGE_REDIRECT_URI', ''),
+            'scope' => env('EXCHANGE_SCOPE', 'https://graph.microsoft.com/Mail.Send'),
+            'auth_method' => env('EXCHANGE_AUTH_METHOD', 'client_credentials'),
+            'from_email' => env('MAIL_FROM_ADDRESS', ''),
+            'from_name' => env('MAIL_FROM_NAME', 'Exchange Email Service'),
+        ];
+        
+        return array_merge($envConfig, $config);
+    }
+
+    /**
+     * Get the services provided by the provider
      */
     public function provides()
     {
-        return [ExchangeEmailService::class, 'exchange-email'];
+        return ['exchange-email', ExchangeEmailService::class];
     }
 }

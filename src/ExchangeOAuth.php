@@ -5,13 +5,13 @@ namespace AgabaandreOffice365\ExchangeEmailService;
 /**
  * Exchange OAuth Handler
  * 
- * Handles OAuth 2.0 authentication with Microsoft Graph API
- * - Authorization Code Flow
- * - Token refresh
- * - Token storage
- * - Email sending via Graph API
+ * Handles OAuth 2.0 flows with Microsoft Graph API:
+ * - Authorization Code Flow (user-based)
+ * - Client Credentials Flow (application-based)
+ * - Automatic token refresh
+ * - File-based token storage
  * 
- * @author SendMail ExchangeEmailService
+ * @author Andre Agaba
  * @version 1.0.0
  */
 class ExchangeOAuth
@@ -24,16 +24,47 @@ class ExchangeOAuth
     protected $accessToken;
     protected $refreshToken;
     protected $tokenExpiresAt;
+    protected $authMethod;
+    protected $fromEmail;
+    protected $fromName;
+    protected $tokenFile;
+    protected $config;
 
-    public function __construct($tenantId = null, $clientId = null, $clientSecret = null, $redirectUri = null, $scope = null)
+    // Supported authentication methods
+    const AUTH_AUTHORIZATION_CODE = 'authorization_code';
+    const AUTH_CLIENT_CREDENTIALS = 'client_credentials';
+
+    public function __construct(array $config = [])
     {
-        $this->tenantId = $tenantId ?: getenv('EXCHANGE_TENANT_ID');
-        $this->clientId = $clientId ?: getenv('EXCHANGE_CLIENT_ID');
-        $this->clientSecret = $clientSecret ?: getenv('EXCHANGE_CLIENT_SECRET');
-        $this->redirectUri = $redirectUri ?: getenv('EXCHANGE_REDIRECT_URI');
-        $this->scope = $scope ?: getenv('EXCHANGE_SCOPE') ?: 'https://graph.microsoft.com/Mail.Send';
+        $this->config = $config;
+        $this->tenantId = $config['tenant_id'] ?? getenv('EXCHANGE_TENANT_ID');
+        $this->clientId = $config['client_id'] ?? getenv('EXCHANGE_CLIENT_ID');
+        $this->clientSecret = $config['client_secret'] ?? getenv('EXCHANGE_CLIENT_SECRET');
+        $this->redirectUri = $config['redirect_uri'] ?? getenv('EXCHANGE_REDIRECT_URI');
+        $this->scope = $config['scope'] ?? getenv('EXCHANGE_SCOPE') ?: 'https://graph.microsoft.com/Mail.Send';
+        $this->authMethod = $config['auth_method'] ?? getenv('EXCHANGE_AUTH_METHOD') ?: self::AUTH_AUTHORIZATION_CODE;
+        $this->fromEmail = $config['from_email'] ?? getenv('MAIL_FROM_ADDRESS');
+        $this->fromName = $config['from_name'] ?? getenv('MAIL_FROM_NAME');
+        
+        // Set token file path
+        $tokenPath = $config['token_storage']['path'] ?? 'tokens/oauth_tokens.json';
+        $this->tokenFile = $this->resolveTokenPath($tokenPath);
         
         $this->loadStoredTokens();
+    }
+
+    /**
+     * Resolve token file path
+     */
+    protected function resolveTokenPath($path)
+    {
+        // If absolute path, use as is
+        if (strpos($path, '/') === 0) {
+            return $path;
+        }
+        
+        // If relative path, resolve from current working directory
+        return getcwd() . '/' . ltrim($path, '/');
     }
 
     /**
@@ -47,25 +78,15 @@ class ExchangeOAuth
     }
 
     /**
-     * Check if we have valid tokens
+     * Get authorization URL for Authorization Code Flow
      */
-    public function hasValidToken()
+    public function getAuthorizationUrl($state = null)
     {
-        return !empty($this->accessToken) && 
-               $this->tokenExpiresAt && 
-               time() < $this->tokenExpiresAt;
-    }
-
-    /**
-     * Get authorization URL
-     */
-    public function getAuthorizationUrl()
-    {
-        if (!$this->isConfigured()) {
-            throw new \Exception('OAuth not configured');
+        if ($this->authMethod !== self::AUTH_AUTHORIZATION_CODE) {
+            throw new \Exception('Authorization URL only available for authorization_code flow');
         }
 
-        $state = bin2hex(random_bytes(16));
+        $state = $state ?: bin2hex(random_bytes(16));
         $_SESSION['oauth_state'] = $state;
 
         $params = [
@@ -73,8 +94,8 @@ class ExchangeOAuth
             'response_type' => 'code',
             'redirect_uri' => $this->redirectUri,
             'scope' => $this->scope,
-            'response_mode' => 'query',
-            'state' => $state
+            'state' => $state,
+            'response_mode' => 'query'
         ];
 
         return 'https://login.microsoftonline.com/' . $this->tenantId . '/oauth2/v2.0/authorize?' . http_build_query($params);
@@ -83,35 +104,32 @@ class ExchangeOAuth
     /**
      * Exchange authorization code for tokens
      */
-    public function exchangeCodeForToken($code, $state)
+    public function exchangeCodeForToken($code, $state = null)
     {
-        if (!$this->isConfigured()) {
-            throw new \Exception('OAuth not configured');
+        if ($this->authMethod !== self::AUTH_AUTHORIZATION_CODE) {
+            throw new \Exception('Code exchange only available for authorization_code flow');
         }
 
-        // Verify state parameter
-        if (!isset($_SESSION['oauth_state']) || $_SESSION['oauth_state'] !== $state) {
+        // Verify state
+        if ($state && (!isset($_SESSION['oauth_state']) || $_SESSION['oauth_state'] !== $state)) {
             throw new \Exception('Invalid state parameter');
         }
 
-        $tokenUrl = 'https://login.microsoftonline.com/' . $this->tenantId . '/oauth2/v2.0/token';
-        
+        $url = 'https://login.microsoftonline.com/' . $this->tenantId . '/oauth2/v2.0/token';
         $data = [
             'client_id' => $this->clientId,
             'client_secret' => $this->clientSecret,
             'code' => $code,
             'redirect_uri' => $this->redirectUri,
-            'grant_type' => 'authorization_code',
-            'scope' => $this->scope
+            'grant_type' => 'authorization_code'
         ];
 
-        $response = $this->makeHttpRequest($tokenUrl, 'POST', $data);
-        
+        $response = $this->makeHttpRequest($url, 'POST', $data);
+
         if (isset($response['access_token'])) {
             $this->accessToken = $response['access_token'];
             $this->refreshToken = $response['refresh_token'] ?? null;
             $this->tokenExpiresAt = time() + ($response['expires_in'] ?? 3600);
-            
             $this->storeTokens();
             unset($_SESSION['oauth_state']);
             
@@ -122,31 +140,63 @@ class ExchangeOAuth
     }
 
     /**
+     * Get access token using Client Credentials Flow
+     */
+    public function getClientCredentialsToken()
+    {
+        if ($this->authMethod !== self::AUTH_CLIENT_CREDENTIALS) {
+            throw new \Exception('Client credentials only available for client_credentials flow');
+        }
+
+        $url = 'https://login.microsoftonline.com/' . $this->tenantId . '/oauth2/v2.0/token';
+        $data = [
+            'client_id' => $this->clientId,
+            'client_secret' => $this->clientSecret,
+            'scope' => $this->scope,
+            'grant_type' => 'client_credentials'
+        ];
+
+        $response = $this->makeHttpRequest($url, 'POST', $data);
+
+        if (isset($response['access_token'])) {
+            $this->accessToken = $response['access_token'];
+            $this->refreshToken = null; // Client credentials don't have refresh tokens
+            $this->tokenExpiresAt = time() + ($response['expires_in'] ?? 3600);
+            $this->storeTokens();
+            return true;
+        }
+
+        throw new \Exception('Failed to get client credentials token: ' . ($response['error_description'] ?? 'Unknown error'));
+    }
+
+    /**
      * Refresh access token
      */
     public function refreshAccessToken()
     {
+        // For client credentials, get a new token
+        if ($this->authMethod === self::AUTH_CLIENT_CREDENTIALS) {
+            return $this->getClientCredentialsToken();
+        }
+
         if (!$this->refreshToken) {
             return false;
         }
 
-        $tokenUrl = 'https://login.microsoftonline.com/' . $this->tenantId . '/oauth2/v2.0/token';
-        
+        $url = 'https://login.microsoftonline.com/' . $this->tenantId . '/oauth2/v2.0/token';
         $data = [
             'client_id' => $this->clientId,
             'client_secret' => $this->clientSecret,
             'refresh_token' => $this->refreshToken,
-            'grant_type' => 'refresh_token',
-            'scope' => $this->scope
+            'grant_type' => 'refresh_token'
         ];
 
-        $response = $this->makeHttpRequest($tokenUrl, 'POST', $data);
-        
+        $response = $this->makeHttpRequest($url, 'POST', $data);
+
         if (isset($response['access_token'])) {
             $this->accessToken = $response['access_token'];
             $this->refreshToken = $response['refresh_token'] ?? $this->refreshToken;
             $this->tokenExpiresAt = time() + ($response['expires_in'] ?? 3600);
-            
             $this->storeTokens();
             return true;
         }
@@ -155,17 +205,46 @@ class ExchangeOAuth
     }
 
     /**
+     * Get access token with automatic refresh
+     */
+    public function getAccessToken()
+    {
+        // Check if token needs refresh (5 minutes buffer)
+        if ($this->accessToken && $this->tokenExpiresAt && time() < ($this->tokenExpiresAt - 300)) {
+            return $this->accessToken;
+        }
+
+        // Try to refresh token
+        if ($this->refreshAccessToken()) {
+            return $this->accessToken;
+        }
+
+        // If client credentials, try to get new token
+        if ($this->authMethod === self::AUTH_CLIENT_CREDENTIALS) {
+            if ($this->getClientCredentialsToken()) {
+                return $this->accessToken;
+            }
+        }
+
+        throw new \Exception('Unable to obtain valid access token');
+    }
+
+    /**
      * Send email via Microsoft Graph API
      */
     public function sendEmail($to, $subject, $body, $isHtml = true, $fromEmail = null, $fromName = null, $cc = [], $bcc = [], $attachments = [])
     {
-        if (!$this->hasValidToken()) {
-            throw new \Exception('No valid access token');
+        // Get valid access token
+        $accessToken = $this->getAccessToken();
+
+        $fromEmail = $fromEmail ?: $this->fromEmail;
+        $fromName = $fromName ?: $this->fromName;
+
+        if (!$fromEmail) {
+            throw new \Exception('From email address is required');
         }
 
-        $fromEmail = $fromEmail ?: getenv('MAIL_FROM_ADDRESS');
-        $fromName = $fromName ?: getenv('MAIL_FROM_NAME');
-
+        // Prepare email data
         $emailData = [
             'message' => [
                 'subject' => $subject,
@@ -175,7 +254,7 @@ class ExchangeOAuth
                 ],
                 'toRecipients' => array_map(function($email) {
                     return ['emailAddress' => ['address' => $email]];
-                }, is_array($to) ? $to : [$to]),
+                }, (array)$to),
                 'from' => [
                     'emailAddress' => [
                         'address' => $fromEmail,
@@ -185,166 +264,116 @@ class ExchangeOAuth
             ]
         ];
 
-        // Add CC recipients if provided
+        // Add CC recipients
         if (!empty($cc)) {
             $emailData['message']['ccRecipients'] = array_map(function($email) {
                 return ['emailAddress' => ['address' => $email]];
-            }, $cc);
+            }, (array)$cc);
         }
 
-        // Add BCC recipients if provided
+        // Add BCC recipients
         if (!empty($bcc)) {
             $emailData['message']['bccRecipients'] = array_map(function($email) {
                 return ['emailAddress' => ['address' => $email]];
-            }, $bcc);
+            }, (array)$bcc);
         }
 
-        // Add attachments if provided
+        // Add attachments
         if (!empty($attachments)) {
-            $emailData['message']['attachments'] = array_map(function($attachment) {
-                return [
-                    '@odata.type' => '#microsoft.graph.fileAttachment',
-                    'name' => $attachment['name'],
-                    'contentType' => $attachment['content_type'] ?? 'application/octet-stream',
-                    'contentBytes' => base64_encode($attachment['content'])
-                ];
-            }, $attachments);
+            $emailData['message']['attachments'] = $attachments;
         }
 
         $url = 'https://graph.microsoft.com/v1.0/me/sendMail';
-        $response = $this->makeHttpRequest($url, 'POST', $emailData, [
-            'Authorization: Bearer ' . $this->accessToken
-        ]);
+        $headers = [
+            'Authorization: Bearer ' . $accessToken,
+            'Content-Type: application/json'
+        ];
 
-        return !isset($response['error']);
+        $response = $this->makeHttpRequest($url, 'POST', $emailData, $headers);
+
+        return $response !== false;
     }
 
     /**
-     * Load stored tokens from database
+     * Load stored tokens from file
      */
     protected function loadStoredTokens()
     {
         try {
-            // Try to load from database if available
-            if (class_exists('PDO')) {
-                $pdo = $this->getDatabaseConnection();
-                if ($pdo) {
-                    $stmt = $pdo->prepare("
-                        SELECT access_token, refresh_token, expires_at 
-                        FROM oauth_tokens 
-                        WHERE service = 'exchange' AND client_id = ? 
-                        ORDER BY created_at DESC 
-                        LIMIT 1
-                    ");
-                    $stmt->execute([$this->clientId]);
-                    $row = $stmt->fetch(\PDO::FETCH_ASSOC);
-                    
-                    if ($row) {
-                        $this->accessToken = $row['access_token'];
-                        $this->refreshToken = $row['refresh_token'];
-                        $this->tokenExpiresAt = strtotime($row['expires_at']);
-                    }
+            if (file_exists($this->tokenFile)) {
+                $tokenData = json_decode(file_get_contents($this->tokenFile), true);
+                
+                if ($tokenData && isset($tokenData[$this->clientId])) {
+                    $tokens = $tokenData[$this->clientId];
+                    $this->accessToken = $tokens['access_token'] ?? null;
+                    $this->refreshToken = $tokens['refresh_token'] ?? null;
+                    $this->tokenExpiresAt = $tokens['expires_at'] ?? null;
+                    $this->authMethod = $tokens['auth_method'] ?? $this->authMethod;
                 }
             }
         } catch (\Exception $e) {
-            // Ignore database errors, continue without stored tokens
+            // Ignore file errors, continue without stored tokens
         }
     }
 
     /**
-     * Store tokens in database
+     * Store tokens in file
      */
     protected function storeTokens()
     {
         try {
-            $pdo = $this->getDatabaseConnection();
-            if ($pdo) {
-                // Create table if it doesn't exist
-                $pdo->exec("
-                    CREATE TABLE IF NOT EXISTS oauth_tokens (
-                        id INT AUTO_INCREMENT PRIMARY KEY,
-                        service VARCHAR(50) NOT NULL,
-                        client_id VARCHAR(255) NOT NULL,
-                        access_token TEXT NOT NULL,
-                        refresh_token TEXT,
-                        expires_at TIMESTAMP NOT NULL,
-                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                        INDEX idx_service (service),
-                        INDEX idx_client (client_id)
-                    )
-                ");
-
-                // Insert or update tokens
-                $stmt = $pdo->prepare("
-                    INSERT INTO oauth_tokens (service, client_id, access_token, refresh_token, expires_at) 
-                    VALUES ('exchange', ?, ?, ?, ?)
-                    ON DUPLICATE KEY UPDATE 
-                    access_token = VALUES(access_token),
-                    refresh_token = VALUES(refresh_token),
-                    expires_at = VALUES(expires_at)
-                ");
-
-                $stmt->execute([
-                    $this->clientId,
-                    $this->accessToken,
-                    $this->refreshToken,
-                    date('Y-m-d H:i:s', $this->tokenExpiresAt)
-                ]);
+            // Create tokens directory if it doesn't exist
+            $tokenDir = dirname($this->tokenFile);
+            if (!is_dir($tokenDir)) {
+                mkdir($tokenDir, 0755, true);
             }
+            
+            // Load existing tokens
+            $tokenData = [];
+            if (file_exists($this->tokenFile)) {
+                $tokenData = json_decode(file_get_contents($this->tokenFile), true) ?: [];
+            }
+            
+            // Update tokens for this client
+            $tokenData[$this->clientId] = [
+                'access_token' => $this->accessToken,
+                'refresh_token' => $this->refreshToken,
+                'expires_at' => $this->tokenExpiresAt,
+                'auth_method' => $this->authMethod,
+                'updated_at' => time()
+            ];
+            
+            // Save to file
+            file_put_contents($this->tokenFile, json_encode($tokenData, JSON_PRETTY_PRINT));
+            
         } catch (\Exception $e) {
-            // Ignore database errors, tokens will be lost on restart
+            // Ignore file errors
         }
     }
 
     /**
-     * Get database connection
-     */
-    protected function getDatabaseConnection()
-    {
-        try {
-            $host = getenv('DB_HOST') ?: 'localhost';
-            $dbname = getenv('DB_DATABASE') ?: 'exchange_email';
-            $username = getenv('DB_USERNAME') ?: 'root';
-            $password = getenv('DB_PASSWORD') ?: '';
-
-            return new \PDO("mysql:host={$host};dbname={$dbname}", $username, $password);
-        } catch (\Exception $e) {
-            return null;
-        }
-    }
-
-    /**
-     * Make HTTP request
+     * Make HTTP request with enhanced error handling
      */
     protected function makeHttpRequest($url, $method = 'GET', $data = null, $headers = [])
     {
         $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, $url);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
-        curl_setopt($ch, CURLOPT_TIMEOUT, 30);
+        
+        curl_setopt_array($ch, [
+            CURLOPT_URL => $url,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_TIMEOUT => 30,
+            CURLOPT_CUSTOMREQUEST => $method,
+            CURLOPT_HTTPHEADER => $headers,
+            CURLOPT_SSL_VERIFYPEER => true,
+            CURLOPT_SSL_VERIFYHOST => 2,
+        ]);
 
-        if ($method === 'POST') {
-            curl_setopt($ch, CURLOPT_POST, true);
-            if ($data) {
-                if (is_array($data)) {
-                    // For OAuth token requests, use form-encoded data
-                    if (strpos($url, '/oauth2/v2.0/token') !== false) {
-                        curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($data));
-                        $headers[] = 'Content-Type: application/x-www-form-urlencoded';
-                    } else {
-                        // For other requests, use JSON
-                        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
-                        $headers[] = 'Content-Type: application/json';
-                    }
-                } else {
-                    curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
-                }
+        if ($data) {
+            if (in_array('Content-Type: application/json', $headers)) {
+                curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+            } else {
+                curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($data));
             }
-        }
-
-        if (!empty($headers)) {
-            curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
         }
 
         $response = curl_exec($ch);
@@ -357,35 +386,47 @@ class ExchangeOAuth
         }
 
         $decodedResponse = json_decode($response, true);
-        
+
         if ($httpCode >= 400) {
-            throw new \Exception('HTTP error ' . $httpCode . ': ' . ($decodedResponse['error_description'] ?? $response));
+            $errorMessage = $decodedResponse['error_description'] ?? $decodedResponse['error'] ?? 'HTTP ' . $httpCode;
+            throw new \Exception('API error: ' . $errorMessage);
         }
 
         return $decodedResponse ?: $response;
     }
 
     /**
-     * Get access token
+     * Clear stored tokens
      */
-    public function getAccessToken()
+    public function clearTokens()
     {
-        return $this->accessToken;
+        $this->accessToken = null;
+        $this->refreshToken = null;
+        $this->tokenExpiresAt = null;
+        
+        try {
+            if (file_exists($this->tokenFile)) {
+                $tokenData = json_decode(file_get_contents($this->tokenFile), true) ?: [];
+                unset($tokenData[$this->clientId]);
+                file_put_contents($this->tokenFile, json_encode($tokenData, JSON_PRETTY_PRINT));
+            }
+        } catch (\Exception $e) {
+            // Ignore file errors
+        }
     }
 
     /**
-     * Get refresh token
+     * Get token information
      */
-    public function getRefreshToken()
+    public function getTokenInfo()
     {
-        return $this->refreshToken;
-    }
-
-    /**
-     * Get token expiration time
-     */
-    public function getTokenExpiresAt()
-    {
-        return $this->tokenExpiresAt;
+        return [
+            'has_access_token' => !empty($this->accessToken),
+            'has_refresh_token' => !empty($this->refreshToken),
+            'expires_at' => $this->tokenExpiresAt,
+            'expires_in' => $this->tokenExpiresAt ? max(0, $this->tokenExpiresAt - time()) : 0,
+            'auth_method' => $this->authMethod,
+            'is_expired' => $this->tokenExpiresAt ? time() >= $this->tokenExpiresAt : true
+        ];
     }
 }
