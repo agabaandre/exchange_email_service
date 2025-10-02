@@ -2,6 +2,7 @@
     "name": "agabaandre-office365/exchange-email-service",
     "description": "General-purpose email service using Microsoft Graph API with OAuth 2.0 authentication",
     "type": "library",
+    "version": "1.0.0",
     "keywords": [
         "email",
         "microsoft",
@@ -60,5 +61,16 @@
     "scripts": {
         "test": "phpunit",
         "test-coverage": "phpunit --coverage-html coverage"
-    }
+    },
+    "homepage": "https://github.com/agabaandre/exchange_email_service",
+    "support": {
+        "issues": "https://github.com/agabaandre/exchange_email_service/issues",
+        "source": "https://github.com/agabaandre/exchange_email_service"
+    },
+    "funding": [
+        {
+            "type": "github",
+            "url": "https://github.com/sponsors/agabaandre"
+        }
+    ]
 }
