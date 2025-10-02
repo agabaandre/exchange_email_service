@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.1.3] - 2024-10-02
+
+### Fixed
+- Enhanced error handling for both string and array error responses
+- Improved error message extraction from Microsoft Graph API responses
+- More robust error handling in OAuth token exchange and client credentials flow
+
+### Improved
+- Better error message formatting and debugging capabilities
+- Consistent error handling across all API interaction methods
+- More reliable error reporting for troubleshooting
+
 ## [1.1.2] - 2024-10-02
 
 ### Fixed

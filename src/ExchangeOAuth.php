@@ -176,11 +176,18 @@ class ExchangeOAuth
             return true;
         }
 
+        $errorDescription = $response['error_description'] ?? null;
+        $error = $response['error'] ?? null;
+
         $errorMsg = 'Unknown error';
-        if (isset($response['error_description'])) {
-            $errorMsg = is_array($response['error_description']) ? json_encode($response['error_description']) : $response['error_description'];
-        } elseif (isset($response['error'])) {
-            $errorMsg = is_array($response['error']) ? json_encode($response['error']) : $response['error'];
+        if (is_string($errorDescription)) {
+            $errorMsg = $errorDescription;
+        } elseif (is_array($errorDescription)) {
+            $errorMsg = json_encode($errorDescription);
+        } elseif (is_string($error)) {
+            $errorMsg = $error;
+        } elseif (is_array($error)) {
+            $errorMsg = json_encode($error);
         }
         throw new \Exception('Failed to exchange code for token: ' . $errorMsg);
     }
@@ -212,11 +219,18 @@ class ExchangeOAuth
             return true;
         }
 
+        $errorDescription = $response['error_description'] ?? null;
+        $error = $response['error'] ?? null;
+
         $errorMsg = 'Unknown error';
-        if (isset($response['error_description'])) {
-            $errorMsg = is_array($response['error_description']) ? json_encode($response['error_description']) : $response['error_description'];
-        } elseif (isset($response['error'])) {
-            $errorMsg = is_array($response['error']) ? json_encode($response['error']) : $response['error'];
+        if (is_string($errorDescription)) {
+            $errorMsg = $errorDescription;
+        } elseif (is_array($errorDescription)) {
+            $errorMsg = json_encode($errorDescription);
+        } elseif (is_string($error)) {
+            $errorMsg = $error;
+        } elseif (is_array($error)) {
+            $errorMsg = json_encode($error);
         }
         throw new \Exception('Failed to get client credentials token: ' . $errorMsg);
     }
@@ -440,16 +454,18 @@ class ExchangeOAuth
         $decodedResponse = json_decode($response, true);
 
         if ($httpCode >= 400) {
+            $errorDescription = $decodedResponse['error_description'] ?? null;
+            $error = $decodedResponse['error'] ?? null;
+
             $errorMessage = 'HTTP ' . $httpCode;
-            
-            if (isset($decodedResponse['error_description'])) {
-                $errorMessage = $decodedResponse['error_description'];
-            } elseif (isset($decodedResponse['error'])) {
-                if (is_array($decodedResponse['error'])) {
-                    $errorMessage = json_encode($decodedResponse['error']);
-                } else {
-                    $errorMessage = $decodedResponse['error'];
-                }
+            if (is_string($errorDescription)) {
+                $errorMessage = $errorDescription;
+            } elseif (is_array($errorDescription)) {
+                $errorMessage = json_encode($errorDescription);
+            } elseif (is_string($error)) {
+                $errorMessage = $error;
+            } elseif (is_array($error)) {
+                $errorMessage = json_encode($error);
             }
             
             throw new \Exception('API error: ' . $errorMessage);
