@@ -176,7 +176,13 @@ class ExchangeOAuth
             return true;
         }
 
-        throw new \Exception('Failed to exchange code for token: ' . ($response['error_description'] ?? 'Unknown error'));
+        $errorMsg = 'Unknown error';
+        if (isset($response['error_description'])) {
+            $errorMsg = is_array($response['error_description']) ? json_encode($response['error_description']) : $response['error_description'];
+        } elseif (isset($response['error'])) {
+            $errorMsg = is_array($response['error']) ? json_encode($response['error']) : $response['error'];
+        }
+        throw new \Exception('Failed to exchange code for token: ' . $errorMsg);
     }
 
     /**
@@ -206,7 +212,13 @@ class ExchangeOAuth
             return true;
         }
 
-        throw new \Exception('Failed to get client credentials token: ' . ($response['error_description'] ?? 'Unknown error'));
+        $errorMsg = 'Unknown error';
+        if (isset($response['error_description'])) {
+            $errorMsg = is_array($response['error_description']) ? json_encode($response['error_description']) : $response['error_description'];
+        } elseif (isset($response['error'])) {
+            $errorMsg = is_array($response['error']) ? json_encode($response['error']) : $response['error'];
+        }
+        throw new \Exception('Failed to get client credentials token: ' . $errorMsg);
     }
 
     /**
@@ -428,7 +440,18 @@ class ExchangeOAuth
         $decodedResponse = json_decode($response, true);
 
         if ($httpCode >= 400) {
-            $errorMessage = $decodedResponse['error_description'] ?? $decodedResponse['error'] ?? 'HTTP ' . $httpCode;
+            $errorMessage = 'HTTP ' . $httpCode;
+            
+            if (isset($decodedResponse['error_description'])) {
+                $errorMessage = $decodedResponse['error_description'];
+            } elseif (isset($decodedResponse['error'])) {
+                if (is_array($decodedResponse['error'])) {
+                    $errorMessage = json_encode($decodedResponse['error']);
+                } else {
+                    $errorMessage = $decodedResponse['error'];
+                }
+            }
+            
             throw new \Exception('API error: ' . $errorMessage);
         }
 
