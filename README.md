@@ -9,7 +9,7 @@ A powerful, framework-agnostic PHP package for sending emails via Microsoft Grap
 
 ## ✨ Features
 
-- 🚀 **Microsoft Graph API** - Most reliable email delivery method
+- 🚀 **Microsoft Graph API** - Most reliable email delivery method with "Send mail as any user" capability
 - 🔐 **OAuth 2.0 Security** - No password storage required
 - 🔄 **Automatic Token Refresh** - Seamless token management
 - 🏗️ **Framework Agnostic** - Works with any PHP framework
@@ -284,7 +284,7 @@ $emailService->sendBulkEmail(
 5. Add **Mail.Send** permission (`https://graph.microsoft.com/Mail.Send`)
 6. Click **Grant admin consent**
 
-> **Important**: The application requires the `https://graph.microsoft.com/Mail.Send` permission to send emails via Microsoft Graph API.
+> **Important**: The application requires the `Mail.Send` application permission with "Send mail as any user" capability. This allows the service to send emails on behalf of any user in your organization via Microsoft Graph API.
 
 ### 4. Configure Redirect URI (for Authorization Code flow)
 
@@ -497,7 +497,7 @@ class SendTestEmailCommand extends Command
 - **PHP**: 7.4 or higher
 - **Extensions**: cURL, JSON
 - **Dependencies**: Guzzle HTTP client (installed via Composer)
-- **Azure AD**: Valid app registration with `https://graph.microsoft.com/Mail.Send` permission
+- **Azure AD**: Valid app registration with `Mail.Send` application permission (Send mail as any user)
 - **Microsoft Graph API**: Access to Microsoft Graph API for email sending
 
 ## 🐛 Troubleshooting
