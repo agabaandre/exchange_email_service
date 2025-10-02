@@ -1,6 +1,6 @@
 {
     "name": "agabaandre-office365/exchange-email-service",
-    "description": "General-purpose email service using Microsoft Graph API with OAuth 2.0 authentication",
+    "description": "General-purpose email service using Microsoft Graph API with OAuth 2.0 authentication. Requires https://graph.microsoft.com/Mail.Send permission.",
     "type": "library",
     "version": "1.1.0",
     "keywords": [

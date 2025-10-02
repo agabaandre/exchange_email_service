@@ -281,8 +281,10 @@ $emailService->sendBulkEmail(
 2. Click **Add a permission**
 3. Select **Microsoft Graph**
 4. Choose **Application permissions**
-5. Add **Mail.Send** permission
+5. Add **Mail.Send** permission (`https://graph.microsoft.com/Mail.Send`)
 6. Click **Grant admin consent**
+
+> **Important**: The application requires the `https://graph.microsoft.com/Mail.Send` permission to send emails via Microsoft Graph API.
 
 ### 4. Configure Redirect URI (for Authorization Code flow)
 
@@ -495,7 +497,8 @@ class SendTestEmailCommand extends Command
 - **PHP**: 7.4 or higher
 - **Extensions**: cURL, JSON
 - **Dependencies**: Guzzle HTTP client (installed via Composer)
-- **Azure AD**: Valid app registration with Mail.Send permission
+- **Azure AD**: Valid app registration with `https://graph.microsoft.com/Mail.Send` permission
+- **Microsoft Graph API**: Access to Microsoft Graph API for email sending
 
 ## 🐛 Troubleshooting
 
@@ -515,8 +518,9 @@ class SendTestEmailCommand extends Command
 
 4. **"Failed to send email"**
    - Check recipient email address
-   - Verify OAuth permissions are granted
+   - Verify OAuth permissions are granted (`https://graph.microsoft.com/Mail.Send`)
    - Check Azure app registration settings
+   - Ensure admin consent has been granted for the Mail.Send permission
 
 ### Debug Mode
 
