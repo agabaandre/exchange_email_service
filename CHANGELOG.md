@@ -5,6 +5,33 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] - 2024-10-02
+
+### Added
+- Comprehensive README with detailed examples and documentation
+- Enhanced configuration options and environment variable support
+- Improved error handling and debugging capabilities
+- Better Laravel integration examples and best practices
+- Advanced usage examples for bulk emails, attachments, and templates
+- Troubleshooting guide with common issues and solutions
+- Azure AD setup guide with step-by-step instructions
+- Token management examples and utilities
+- Debug mode configuration and logging
+- Production-ready examples and optimization tips
+
+### Improved
+- Documentation structure and readability
+- Code examples with better formatting
+- Configuration flexibility and ease of use
+- Error messages and debugging information
+- Laravel integration examples
+- Package metadata and discoverability
+
+### Fixed
+- Minor documentation inconsistencies
+- Configuration examples and clarity
+- Environment variable handling
+
 ## [1.0.0] - 2024-10-02
 
 ### Added

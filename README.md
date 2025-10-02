@@ -1,27 +1,40 @@
 # Exchange Email Service
 
-A simple, powerful PHP package for sending emails via Microsoft Graph API with OAuth 2.0 authentication. Works with any PHP application including Laravel, CodeIgniter, Yii, and vanilla PHP projects.
+[![Latest Version](https://img.shields.io/packagist/v/agabaandre-office365/exchange-email-service.svg)](https://packagist.org/packages/agabaandre-office365/exchange-email-service)
+[![License](https://img.shields.io/packagist/l/agabaandre-office365/exchange-email-service.svg)](https://packagist.org/packages/agabaandre-office365/exchange-email-service)
+[![PHP Version](https://img.shields.io/packagist/php-v/agabaandre-office365/exchange-email-service.svg)](https://packagist.org/packages/agabaandre-office365/exchange-email-service)
+[![Total Downloads](https://img.shields.io/packagist/dt/agabaandre-office365/exchange-email-service.svg)](https://packagist.org/packages/agabaandre-office365/exchange-email-service)
 
-## Features
+A powerful, framework-agnostic PHP package for sending emails via Microsoft Graph API with OAuth 2.0 authentication. Works seamlessly with Laravel, CodeIgniter, Yii, and vanilla PHP projects.
 
-- ✅ **OAuth 2.0 Authentication** - Support for both Authorization Code and Client Credentials flows
-- ✅ **File-based Token Storage** - No database required, tokens stored in JSON files
-- ✅ **Automatic Token Refresh** - Built-in token management with automatic refresh
-- ✅ **Framework Agnostic** - Works with Laravel, CodeIgniter, Yii, and vanilla PHP
-- ✅ **Simple API** - Easy to use with minimal configuration
-- ✅ **HTML & Text Support** - Send both HTML and plain text emails
-- ✅ **Template Support** - Simple template rendering with variable substitution
-- ✅ **CC/BCC Support** - Send emails with carbon copy and blind carbon copy
-- ✅ **Error Handling** - Comprehensive error handling and logging
-- ✅ **Debug Mode** - Built-in debugging and logging capabilities
+## ✨ Features
 
-## Installation
+- 🚀 **Microsoft Graph API** - Most reliable email delivery method
+- 🔐 **OAuth 2.0 Security** - No password storage required
+- 🔄 **Automatic Token Refresh** - Seamless token management
+- 🏗️ **Framework Agnostic** - Works with any PHP framework
+- 📧 **Rich Email Support** - HTML, text, templates, attachments
+- 🎯 **Laravel Integration** - Service provider with auto-discovery
+- 📁 **File-based Storage** - No database required for tokens
+- 🛠️ **Easy Configuration** - Simple setup with environment variables
+- 🐛 **Debug Mode** - Comprehensive logging and error handling
+- 📦 **Production Ready** - Tested and optimized for production use
+
+## 📦 Installation
+
+### Via Composer
 
 ```bash
 composer require agabaandre-office365/exchange-email-service
 ```
 
-## Quick Start
+### Manual Installation
+
+1. Download the package
+2. Extract to your project directory
+3. Run `composer install`
+
+## 🚀 Quick Start
 
 ### Vanilla PHP
 
@@ -29,16 +42,16 @@ composer require agabaandre-office365/exchange-email-service
 <?php
 require_once 'vendor/autoload.php';
 
-use AgabaandreOffice365\ExchangeEmailService\ExchangeEmailFactory;
+use AgabaandreOffice365\ExchangeEmailService\ExchangeEmailService;
 
-// Quick setup
-$emailService = ExchangeEmailFactory::quickSetup(
-    'your-tenant-id',
-    'your-client-id',
-    'your-client-secret',
-    'noreply@yourdomain.com',
-    'Your App Name'
-);
+// Quick setup with configuration
+$emailService = new ExchangeEmailService([
+    'tenant_id' => 'your-tenant-id',
+    'client_id' => 'your-client-id',
+    'client_secret' => 'your-client-secret',
+    'from_email' => 'noreply@yourdomain.com',
+    'from_name' => 'Your App Name'
+]);
 
 // Send email
 $emailService->sendEmail(
@@ -49,65 +62,58 @@ $emailService->sendEmail(
 );
 ```
 
-### Laravel
+### Laravel Integration
 
-1. **Register the service provider** in `config/app.php`:
+1. **Install the package:**
+   ```bash
+   composer require agabaandre-office365/exchange-email-service
+   ```
 
-```php
-'providers' => [
-    // ... other providers
-    AgabaandreOffice365\ExchangeEmailService\ExchangeEmailServiceProvider::class,
-],
-```
+2. **Publish configuration:**
+   ```bash
+   php artisan vendor:publish --provider="AgabaandreOffice365\ExchangeEmailService\ExchangeEmailServiceProvider"
+   ```
 
-2. **Publish the configuration**:
+3. **Configure environment variables in `.env`:**
+   ```env
+   EXCHANGE_TENANT_ID=your-tenant-id
+   EXCHANGE_CLIENT_ID=your-client-id
+   EXCHANGE_CLIENT_SECRET=your-client-secret
+   MAIL_FROM_ADDRESS=noreply@yourdomain.com
+   MAIL_FROM_NAME="Your App Name"
+   ```
 
-```bash
-php artisan vendor:publish --provider="AgabaandreOffice365\ExchangeEmailService\ExchangeEmailServiceProvider" --tag="config"
-```
+4. **Use in your application:**
+   ```php
+   use AgabaandreOffice365\ExchangeEmailService\ExchangeEmailService;
+   
+   class EmailController extends Controller
+   {
+       public function sendEmail(ExchangeEmailService $emailService)
+       {
+           $emailService->sendEmail(
+               'recipient@example.com',
+               'Hello from Laravel!',
+               '<h1>Hello!</h1><p>This email was sent from Laravel.</p>'
+           );
+       }
+   }
+   ```
 
-3. **Add to your `.env` file**:
-
-```env
-EXCHANGE_TENANT_ID=your-tenant-id
-EXCHANGE_CLIENT_ID=your-client-id
-EXCHANGE_CLIENT_SECRET=your-client-secret
-MAIL_FROM_ADDRESS=noreply@yourdomain.com
-MAIL_FROM_NAME=Your App Name
-```
-
-4. **Use in your application**:
-
-```php
-use AgabaandreOffice365\ExchangeEmailService\ExchangeEmailService;
-
-class EmailController extends Controller
-{
-    public function sendEmail(ExchangeEmailService $emailService)
-    {
-        $emailService->sendEmail(
-            'recipient@example.com',
-            'Hello from Laravel!',
-            '<h1>Hello!</h1><p>This email was sent from Laravel.</p>'
-        );
-    }
-}
-```
-
-## Configuration
+## ⚙️ Configuration
 
 ### Environment Variables
 
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `EXCHANGE_TENANT_ID` | Azure AD Tenant ID | Required |
-| `EXCHANGE_CLIENT_ID` | Azure AD Application ID | Required |
-| `EXCHANGE_CLIENT_SECRET` | Azure AD Application Secret | Required |
-| `EXCHANGE_REDIRECT_URI` | OAuth Redirect URI | `http://localhost:8000/oauth/callback` |
-| `EXCHANGE_SCOPE` | OAuth Scope | `https://graph.microsoft.com/Mail.Send` |
-| `EXCHANGE_AUTH_METHOD` | Authentication Method | `client_credentials` |
-| `MAIL_FROM_ADDRESS` | Default From Email | Required |
-| `MAIL_FROM_NAME` | Default From Name | `Exchange Email Service` |
+| Variable | Description | Required | Default |
+|----------|-------------|----------|---------|
+| `EXCHANGE_TENANT_ID` | Azure AD Tenant ID | ✅ | - |
+| `EXCHANGE_CLIENT_ID` | Azure AD Application ID | ✅ | - |
+| `EXCHANGE_CLIENT_SECRET` | Azure AD Application Secret | ✅ | - |
+| `EXCHANGE_REDIRECT_URI` | OAuth Redirect URI | ❌ | `http://localhost:8000/oauth/callback` |
+| `EXCHANGE_SCOPE` | OAuth Scope | ❌ | `https://graph.microsoft.com/.default` |
+| `EXCHANGE_AUTH_METHOD` | Authentication Method | ❌ | `client_credentials` |
+| `MAIL_FROM_ADDRESS` | Default From Email | ✅ | - |
+| `MAIL_FROM_NAME` | Default From Name | ❌ | `Exchange Email Service` |
 
 ### Configuration Array
 
@@ -116,9 +122,11 @@ $config = [
     'tenant_id' => 'your-tenant-id',
     'client_id' => 'your-client-id',
     'client_secret' => 'your-client-secret',
+    'redirect_uri' => 'https://yourdomain.com/oauth/callback',
+    'scope' => 'https://graph.microsoft.com/.default',
+    'auth_method' => 'client_credentials', // or 'authorization_code'
     'from_email' => 'noreply@yourdomain.com',
     'from_name' => 'Your App Name',
-    'auth_method' => 'client_credentials', // or 'authorization_code'
     'token_storage' => [
         'type' => 'file',
         'path' => 'tokens/oauth_tokens.json',
@@ -133,7 +141,7 @@ $config = [
 ];
 ```
 
-## Usage Examples
+## 📧 Usage Examples
 
 ### Basic Email Sending
 
@@ -152,7 +160,20 @@ $emailService->sendTextEmail(
     'Hello! This is a plain text email.'
 );
 
-// Send email with CC and BCC
+// Send email with custom from address
+$emailService->sendEmail(
+    'recipient@example.com',
+    'Custom From Email',
+    '<p>This email has a custom from address.</p>',
+    true,
+    'custom@yourdomain.com',
+    'Custom Sender'
+);
+```
+
+### Email with CC and BCC
+
+```php
 $emailService->sendEmail(
     'recipient@example.com',
     'Email with CC/BCC',
@@ -160,18 +181,55 @@ $emailService->sendEmail(
     true,
     null, // from_email (uses default)
     null, // from_name (uses default)
-    ['cc@example.com'], // CC
-    ['bcc@example.com'] // BCC
+    ['cc@example.com'], // CC recipients
+    ['bcc@example.com'] // BCC recipients
+);
+```
+
+### Email with Attachments
+
+```php
+$attachments = [
+    [
+        'name' => 'document.pdf',
+        'content' => file_get_contents('path/to/document.pdf'),
+        'content_type' => 'application/pdf'
+    ],
+    [
+        'name' => 'image.jpg',
+        'content' => file_get_contents('path/to/image.jpg'),
+        'content_type' => 'image/jpeg'
+    ]
+];
+
+$emailService->sendEmail(
+    'recipient@example.com',
+    'Email with Attachments',
+    '<p>Please find the attached files.</p>',
+    true,
+    null, // from_email
+    null, // from_name
+    [], // CC
+    [], // BCC
+    $attachments
 );
 ```
 
 ### Template Emails
 
 ```php
-$template = '<h1>Welcome {{name}}!</h1><p>Your order {{order_id}} is confirmed.</p>';
+$template = '
+    <h1>Welcome {{name}}!</h1>
+    <p>Your order #{{order_id}} is confirmed.</p>
+    <p>Total: ${{total}}</p>
+    <p>Thank you for choosing {{app_name}}!</p>
+';
+
 $data = [
     'name' => 'John Doe',
-    'order_id' => '12345'
+    'order_id' => '12345',
+    'total' => '99.99',
+    'app_name' => 'My Store'
 ];
 
 $emailService->sendTemplateEmail(
@@ -182,48 +240,56 @@ $emailService->sendTemplateEmail(
 );
 ```
 
-### Token Management
+### Bulk Email Sending
 
 ```php
-// Get token information
-$tokenInfo = $emailService->getTokenInfo();
-echo "Token expires in: " . $tokenInfo['expires_in'] . " seconds\n";
+$recipients = [
+    'user1@example.com',
+    'user2@example.com',
+    'user3@example.com'
+];
 
-// Clear stored tokens (useful for logout)
-$emailService->clearTokens();
-
-// Check if service is configured
-if ($emailService->isConfigured()) {
-    echo "Email service is ready!";
-} else {
-    echo "Email service needs configuration.";
-}
+$emailService->sendBulkEmail(
+    $recipients,
+    'Newsletter',
+    '<h1>Monthly Newsletter</h1><p>Check out our latest updates!</p>'
+);
 ```
 
-## Azure AD Setup
+## 🔐 Azure AD Setup
 
-1. **Create an Azure AD Application**:
-   - Go to Azure Portal > Azure Active Directory > App registrations
-   - Click "New registration"
-   - Enter application name and redirect URI
-   - Note down the Application (client) ID and Directory (tenant) ID
+### 1. Create Azure AD Application
 
-2. **Create a Client Secret**:
-   - Go to your app > Certificates & secrets
-   - Click "New client secret"
-   - Note down the secret value
+1. Go to [Azure Portal](https://portal.azure.com)
+2. Navigate to **Azure Active Directory** > **App registrations**
+3. Click **New registration**
+4. Fill in details:
+   - **Name**: Your Email Service
+   - **Redirect URI**: `https://yourdomain.com/oauth/callback` (for authorization code flow)
+5. Note down **Application (client) ID** and **Directory (tenant) ID**
 
-3. **Grant Permissions**:
-   - Go to your app > API permissions
-   - Add permission > Microsoft Graph > Application permissions
-   - Add "Mail.Send" permission
-   - Click "Grant admin consent"
+### 2. Create Client Secret
 
-4. **Configure Redirect URI** (for Authorization Code flow):
-   - Go to your app > Authentication
-   - Add your redirect URI
+1. Go to your app > **Certificates & secrets**
+2. Click **New client secret**
+3. Add description: "Email Service Secret"
+4. Copy the **secret value** (you won't see it again!)
 
-## Authentication Methods
+### 3. Grant Permissions
+
+1. Go to your app > **API permissions**
+2. Click **Add a permission**
+3. Select **Microsoft Graph**
+4. Choose **Application permissions**
+5. Add **Mail.Send** permission
+6. Click **Grant admin consent**
+
+### 4. Configure Redirect URI (for Authorization Code flow)
+
+1. Go to your app > **Authentication**
+2. Add your redirect URI: `https://yourdomain.com/oauth/callback`
+
+## 🔄 Authentication Methods
 
 ### Client Credentials Flow (Recommended for Server Applications)
 
@@ -258,7 +324,27 @@ $authUrl = $emailService->getAuthorizationUrl();
 $emailService->exchangeCodeForToken($code, $state);
 ```
 
-## Error Handling
+## 🛠️ Advanced Usage
+
+### Token Management
+
+```php
+// Get token information
+$tokenInfo = $emailService->getTokenInfo();
+echo "Token expires in: " . $tokenInfo['expires_in'] . " seconds\n";
+
+// Clear stored tokens (useful for logout)
+$emailService->clearTokens();
+
+// Check if service is configured
+if ($emailService->isConfigured()) {
+    echo "Email service is ready!";
+} else {
+    echo "Email service needs configuration.";
+}
+```
+
+### Error Handling
 
 ```php
 try {
@@ -275,10 +361,164 @@ try {
     }
 } catch (Exception $e) {
     echo "Error: " . $e->getMessage();
+    // Log the error for debugging
+    error_log($e->getTraceAsString());
 }
 ```
 
-## Debugging
+### Debug Mode
+
+```php
+$config = [
+    // ... other config
+    'defaults' => [
+        'debug' => true,
+    ]
+];
+
+$emailService = new ExchangeEmailService($config);
+// Debug information will be logged
+```
+
+## 🧪 Testing
+
+### Test Email Service
+
+```php
+use AgabaandreOffice365\ExchangeEmailService\ExchangeEmailService;
+
+$emailService = new ExchangeEmailService([
+    'tenant_id' => 'your-tenant-id',
+    'client_id' => 'your-client-id',
+    'client_secret' => 'your-client-secret',
+    'from_email' => 'noreply@yourdomain.com',
+    'from_name' => 'Your App Name'
+]);
+
+// Test connection
+$tokenInfo = $emailService->getTokenInfo();
+if (!empty($tokenInfo)) {
+    echo "✅ Service is ready!";
+} else {
+    echo "❌ Service needs configuration.";
+}
+
+// Send test email
+$emailService->sendEmail(
+    'test@example.com',
+    'Test Email',
+    '<h1>Test</h1><p>This is a test email.</p>'
+);
+```
+
+## 🚀 Laravel Integration
+
+### Service Provider Registration
+
+The package automatically registers itself with Laravel's service container. You can use it in several ways:
+
+#### Method 1: Dependency Injection (Recommended)
+
+```php
+use AgabaandreOffice365\ExchangeEmailService\ExchangeEmailService;
+
+class EmailController extends Controller
+{
+    public function sendEmail(ExchangeEmailService $emailService)
+    {
+        $emailService->sendEmail(
+            'recipient@example.com',
+            'Hello from Laravel!',
+            '<h1>Hello!</h1><p>This email was sent from Laravel.</p>'
+        );
+    }
+}
+```
+
+#### Method 2: Service Container
+
+```php
+$emailService = app(ExchangeEmailService::class);
+$emailService->sendEmail(/* ... */);
+```
+
+#### Method 3: Facade (if registered)
+
+```php
+use ExchangeEmail;
+
+ExchangeEmail::sendEmail(/* ... */);
+```
+
+### Laravel Jobs
+
+```php
+use AgabaandreOffice365\ExchangeEmailService\ExchangeEmailService;
+
+class SendWelcomeEmail implements ShouldQueue
+{
+    public function handle(ExchangeEmailService $emailService)
+    {
+        $emailService->sendEmail(
+            $this->email,
+            'Welcome!',
+            '<h1>Welcome to our platform!</h1>'
+        );
+    }
+}
+```
+
+### Laravel Commands
+
+```php
+use AgabaandreOffice365\ExchangeEmailService\ExchangeEmailService;
+
+class SendTestEmailCommand extends Command
+{
+    protected $signature = 'email:test {email}';
+    
+    public function handle(ExchangeEmailService $emailService)
+    {
+        $result = $emailService->sendEmail(
+            $this->argument('email'),
+            'Test Email',
+            '<h1>Test Email</h1><p>This is a test email from Laravel.</p>'
+        );
+        
+        $this->info($result ? 'Email sent!' : 'Failed to send email.');
+    }
+}
+```
+
+## 📋 Requirements
+
+- **PHP**: 7.4 or higher
+- **Extensions**: cURL, JSON
+- **Dependencies**: Guzzle HTTP client (installed via Composer)
+- **Azure AD**: Valid app registration with Mail.Send permission
+
+## 🐛 Troubleshooting
+
+### Common Issues
+
+1. **"Email service not configured"**
+   - Check your `.env` file has all required variables
+   - Ensure OAuth credentials are correct
+
+2. **"AADSTS1002012: The provided value for scope is not valid"**
+   - Use `https://graph.microsoft.com/.default` for client credentials flow
+   - Use `https://graph.microsoft.com/Mail.Send` for authorization code flow
+
+3. **"AADSTS900023: Specified tenant identifier is not valid"**
+   - Check your `EXCHANGE_TENANT_ID` is correct
+   - Ensure it's a valid GUID or domain name
+
+4. **"Failed to send email"**
+   - Check recipient email address
+   - Verify OAuth permissions are granted
+   - Check Azure app registration settings
+
+### Debug Mode
 
 Enable debug mode to see detailed logs:
 
@@ -291,27 +531,29 @@ $config = [
 ];
 ```
 
-## Requirements
-
-- PHP 7.4 or higher
-- cURL extension
-- JSON extension
-- Guzzle HTTP client (installed via Composer)
-
-## License
+## 📄 License
 
 This package is open-sourced software licensed under the [MIT license](LICENSE).
 
-## Support
+## 🤝 Contributing
 
-For issues and questions, please open an issue on GitHub or contact the author.
+Contributions are welcome! Please feel free to submit a Pull Request.
 
-## Changelog
+## 📞 Support
 
-### 1.0.0
-- Initial release
-- OAuth 2.0 authentication support
-- File-based token storage
-- Framework agnostic design
-- Laravel integration
-- Vanilla PHP support
+- **Issues**: [GitHub Issues](https://github.com/agabaandre/exchange_email_service/issues)
+- **Email**: agabaandre@gmail.com
+- **Documentation**: [GitHub Wiki](https://github.com/agabaandre/exchange_email_service/wiki)
+
+## 🎯 Roadmap
+
+- [ ] Database token storage option
+- [ ] Email queue support
+- [ ] Advanced template engine
+- [ ] Webhook support
+- [ ] Rate limiting
+- [ ] Email analytics
+
+---
+
+**Made with ❤️ by [Andre Agaba](https://github.com/agabaandre)**
