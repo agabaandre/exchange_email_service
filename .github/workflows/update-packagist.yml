@@ -9,7 +9,12 @@ jobs:
   update-packagist:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
       - name: Update Packagist
-        uses: docker://triggerpackagist:latest
+        uses: packagist/action@v1
         with:
-          args: 'https://packagist.org/api/update-package?username=YOUR_PACKAGIST_USERNAME&apiToken=YOUR_PACKAGIST_TOKEN&repository=https://github.com/agabaandre/exchange_email_service'
+          packagist-username: ${{ secrets.PACKAGIST_USERNAME }}
+          packagist-token: ${{ secrets.PACKAGIST_TOKEN }}
+          packagist-repository-url: https://github.com/agabaandre/exchange_email_service
