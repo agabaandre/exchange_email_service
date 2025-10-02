@@ -129,7 +129,7 @@ $config = [
     'from_name' => 'Your App Name',
     'token_storage' => [
         'type' => 'file',
-        'path' => 'tokens/oauth_tokens.json',
+        'path' => 'storage/exchange-email-tokens.json',
         'permissions' => 0644,
     ],
     'defaults' => [
@@ -345,6 +345,17 @@ if ($emailService->isConfigured()) {
     echo "Email service needs configuration.";
 }
 ```
+
+### Token Storage
+
+The package uses **intelligent file-based storage** that automatically finds the best writable location:
+
+1. **Project Root** - `storage/exchange-email-tokens.json` (recommended)
+2. **System Temp** - `/tmp/exchange-email-tokens/` (fallback)
+3. **User Home** - `~/.exchange-email-tokens/` (fallback)
+4. **Current Directory** - `./storage/` (fallback)
+
+**No vendor directory issues** - The package automatically avoids writing to the vendor directory and finds a writable location.
 
 ### Error Handling
 

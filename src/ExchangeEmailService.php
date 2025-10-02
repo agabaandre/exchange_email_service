@@ -40,7 +40,7 @@ class ExchangeEmailService
             'from_name' => 'Exchange Email Service',
             'token_storage' => [
                 'type' => 'file',
-                'path' => 'tokens/oauth_tokens.json',
+                'path' => 'storage/exchange-email-tokens.json',
                 'permissions' => 0644,
             ],
             'defaults' => [

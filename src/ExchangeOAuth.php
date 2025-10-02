@@ -63,8 +63,48 @@ class ExchangeOAuth
             return $path;
         }
         
-        // If relative path, resolve from current working directory
-        return getcwd() . '/' . ltrim($path, '/');
+        // If relative path, try to resolve to a writable location
+        $resolvedPath = $this->findWritablePath($path);
+        
+        return $resolvedPath;
+    }
+    
+    /**
+     * Find a writable path for token storage
+     */
+    protected function findWritablePath($relativePath)
+    {
+        $candidates = [
+            // Try project root (outside vendor)
+            getcwd() . '/' . ltrim($relativePath, '/'),
+            // Try system temp directory
+            sys_get_temp_dir() . '/exchange-email-tokens/' . basename($relativePath),
+            // Try user home directory
+            (getenv('HOME') ?: getenv('USERPROFILE')) . '/.exchange-email-tokens/' . basename($relativePath),
+            // Try current directory as fallback
+            './' . ltrim($relativePath, '/')
+        ];
+        
+        foreach ($candidates as $candidate) {
+            $dir = dirname($candidate);
+            
+            // Create directory if it doesn't exist
+            if (!is_dir($dir)) {
+                try {
+                    mkdir($dir, 0755, true);
+                } catch (\Exception $e) {
+                    continue;
+                }
+            }
+            
+            // Check if directory is writable
+            if (is_writable($dir)) {
+                return $candidate;
+            }
+        }
+        
+        // Fallback to current working directory (original behavior)
+        return getcwd() . '/' . ltrim($relativePath, '/');
     }
 
     /**
